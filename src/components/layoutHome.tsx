@@ -37,7 +37,7 @@ const LayoutHome: React.FC = () => {
         </Link>
         <Link
           to="/historico"
-          className="bg-blue-800 text-white rounded-full px-38 py-4 min-w-[220px] text-center hover:bg-blue-900 transition text-[30px]"
+          className="cursor-pointer bg-blue-800 text-white rounded-full px-38 py-4 min-w-[220px] text-center hover:bg-blue-900 transition text-[30px]"
         >
           Histórico
         </Link>
