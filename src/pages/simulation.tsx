@@ -1,4 +1,6 @@
 import React from "react";
+//import { defaultParams } from "src/values/defaultValues";
+//                                                     Usar pnpm! -Tokuji
 // import logo from "../assets/logo.png";
 import { TrendingUp } from "lucide-react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
@@ -21,19 +23,35 @@ import diagramaFuselagem from "../assets/diagramaFuselagem.jpeg";
 import analiseAlpha from "../assets/analiseAlpha.jpeg";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+//import { runSimulation } from "src/utils/calculations";
+
+export interface SimulationParams {
+  Xcg: number;
+  Xac_w: number;
+  cw: number;
+  iw: number;
+  Sw: number;
+  ct: number;
+  it: number;
+  St: number;
+  lt: number;
+  Cm_ac: number;
+  Cl_0: number;
+  Cl_alpha: number;
+}
 
 const Simulacao: React.FC = () => {
   const chartData = [
-    { month: "January", mobile: 186 },
+    { month: "January", mobile: 200 },
     { month: "February", mobile: 305 },
     { month: "March", mobile: 237 },
     { month: "April", mobile: 73 },
-    { month: "May", mobile: 209 },
-    { month: "June", mobile: 214 },
-    { month: "July", mobile: 400 },
+    { month: "May", mobile: 103 },
+    { month: "June", mobile: 94 },
+    { month: "July", mobile: 300 },
     { month: "August", mobile: 300 },
     { month: "September", mobile: 250 },
-    { month: "October", mobile: 320 },
+    { month: "October", mobile: 390 },
     { month: "November", mobile: 280 },
     { month: "December", mobile: 350 },
   ];
@@ -43,8 +61,27 @@ const Simulacao: React.FC = () => {
       color: "var(--chart-1)",
     },
   };
+  //fechar e abrir painéis laterais
   const [geometriaOpen, setGeometriaOpen] = useState(true);
   const [aerodinamicaOpen, setAerodinamicaOpen] = useState(true);
+
+  const [params, setparams] = useState<SimulationParams>({
+    Xcg: 0,
+    Xac_w: 0,
+    cw: 0,
+    iw: 0,
+    Sw: 0,
+    ct: 0,
+    it: 0,
+    St: 0,
+    lt: 0,
+    Cm_ac: 0,
+    Cl_0: 0,
+    Cl_alpha: 0,
+  });
+  const handleChange = (field: keyof typeof params, value: number) => {
+    setparams((prev) => ({ ...prev, [field]: value }));
+  };
 
   return (
     <div className="min-h-screen p-2 flex flex-row bg-gray-100">
@@ -187,7 +224,9 @@ const Simulacao: React.FC = () => {
           >
             <h2 className="text-xl font-semibold text-gray-800">Geometria</h2>
             <svg
-              className={`w-5 h-5 text-gray-600 transition-transform duration-300 ${geometriaOpen ? "rotate-180" : ""}`}
+              className={`w-5 h-5 text-gray-600 transition-transform duration-300 ${
+                geometriaOpen ? "rotate-180" : ""
+              }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -211,6 +250,10 @@ const Simulacao: React.FC = () => {
                 <div className="flex items-center">
                   <input
                     type="number"
+                    value={params.Xcg}
+                    onChange={(e) =>
+                      handleChange("Xcg", parseFloat(e.target.value))
+                    }
                     className="w-[120px] p-2 border border-gray-300 rounded-md bg-gray-100"
                   />
                   <span className="ml-2 text-gray-500">m</span>
@@ -223,6 +266,10 @@ const Simulacao: React.FC = () => {
                 <div className="flex items-center">
                   <input
                     type="number"
+                    value={params.Xac_w}
+                    onChange={(e) =>
+                      handleChange("Xac_w", parseFloat(e.target.value))
+                    }
                     className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                   <span className="ml-2 text-gray-500">m</span>
@@ -235,6 +282,10 @@ const Simulacao: React.FC = () => {
                 <div className="flex items-center">
                   <input
                     type="number"
+                    value={params.cw}
+                    onChange={(e) =>
+                      handleChange("cw", parseFloat(e.target.value))
+                    }
                     className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                   <span className="ml-2 text-gray-500">m</span>
@@ -247,6 +298,10 @@ const Simulacao: React.FC = () => {
                 <div className="flex items-center">
                   <input
                     type="number"
+                    value={params.iw}
+                    onChange={(e) =>
+                      handleChange("iw", parseFloat(e.target.value))
+                    }
                     className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                   <span className="ml-2 text-gray-500">°</span>
@@ -259,6 +314,10 @@ const Simulacao: React.FC = () => {
                 <div className="flex items-center">
                   <input
                     type="number"
+                    value={params.Sw}
+                    onChange={(e) =>
+                      handleChange("Sw", parseFloat(e.target.value))
+                    }
                     className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                   <span className="ml-2 text-gray-500">m²</span>
@@ -271,6 +330,10 @@ const Simulacao: React.FC = () => {
                 <div className="flex items-center">
                   <input
                     type="number"
+                    value={params.ct}
+                    onChange={(e) =>
+                      handleChange("ct", parseFloat(e.target.value))
+                    }
                     className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                   <span className="ml-2 text-gray-500">m</span>
@@ -283,6 +346,10 @@ const Simulacao: React.FC = () => {
                 <div className="flex items-center">
                   <input
                     type="number"
+                    value={params.it}
+                    onChange={(e) =>
+                      handleChange("it", parseFloat(e.target.value))
+                    }
                     className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                   <span className="ml-2 text-gray-500">°</span>
@@ -295,6 +362,10 @@ const Simulacao: React.FC = () => {
                 <div className="flex items-center">
                   <input
                     type="number"
+                    value={params.St}
+                    onChange={(e) =>
+                      handleChange("St", parseFloat(e.target.value))
+                    }
                     className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                   <span className="ml-2 text-gray-500">m²</span>
@@ -307,6 +378,10 @@ const Simulacao: React.FC = () => {
                 <div className="flex items-center">
                   <input
                     type="number"
+                    value={params.lt}
+                    onChange={(e) =>
+                      handleChange("lt", parseFloat(e.target.value))
+                    }
                     className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                   <span className="ml-2 text-gray-500">m</span>
@@ -355,7 +430,9 @@ const Simulacao: React.FC = () => {
               Aerodinamica
             </h2>
             <svg
-              className={`w-5 h-5 text-gray-600 transition-transform duration-300 ${aerodinamicaOpen ? "rotate-180" : ""}`}
+              className={`w-5 h-5 text-gray-600 transition-transform duration-300 ${
+                aerodinamicaOpen ? "rotate-180" : ""
+              }`}
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -379,6 +456,10 @@ const Simulacao: React.FC = () => {
                 <div className="flex items-center">
                   <input
                     type="number"
+                    value={params.Cm_ac}
+                    onChange={(e) =>
+                      handleChange("Cm_ac", parseFloat(e.target.value))
+                    }
                     className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                   <span className="ml-2 text-gray-500">kg.m/s</span>
@@ -391,6 +472,10 @@ const Simulacao: React.FC = () => {
                 <div className="flex items-center">
                   <input
                     type="number"
+                    value={params.Cl_0}
+                    onChange={(e) =>
+                      handleChange("Cl_0", parseFloat(e.target.value))
+                    }
                     className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
@@ -402,6 +487,10 @@ const Simulacao: React.FC = () => {
                 <div className="flex items-center">
                   <input
                     type="number"
+                    value={params.Cl_alpha}
+                    onChange={(e) =>
+                      handleChange("Cl_alpha", parseFloat(e.target.value))
+                    }
                     className="w-[270px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>
