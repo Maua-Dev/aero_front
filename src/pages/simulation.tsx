@@ -1,14 +1,18 @@
-import React from "react";
-//import { defaultParams } from "src/values/defaultValues";
-//                                                     Usar pnpm! -Tokuji
-// import logo from "../assets/logo.png";
-import { TrendingUp } from "lucide-react";
-import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
+import React, { useEffect } from "react";
+import {
+  Area,
+  AreaChart,
+  CartesianGrid,
+  XAxis,
+  YAxis,
+  ReferenceLine,
+  ReferenceDot,
+} from "recharts";
+
 import {
   Card,
   CardContent,
   CardDescription,
-  CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -23,47 +27,23 @@ import diagramaFuselagem from "../assets/diagramaFuselagem.jpeg";
 import analiseAlpha from "../assets/analiseAlpha.jpeg";
 import { Link } from "react-router-dom";
 import { useState } from "react";
+import { GeometriaPanel } from "@/components/ui/geometry";
+import { AerodinamicaPanel } from "@/components/ui/aerodynamics";
+import { runSimulation } from "@/utils/calculations";
+import { GraphAdjustmentPanel } from "@/components/ui/graph_adjustment";
 //import { runSimulation } from "src/utils/calculations";
 
-export interface SimulationParams {
-  Xcg: number;
-  Xac_w: number;
-  cw: number;
-  iw: number;
-  Sw: number;
-  ct: number;
-  it: number;
-  St: number;
-  lt: number;
-  Cm_ac: number;
-  Cl_0: number;
-  Cl_alpha: number;
-}
+import type { SimulationParams } from "@/types/simulation";
 
 const Simulacao: React.FC = () => {
-  const chartData = [
-    { month: "January", mobile: 200 },
-    { month: "February", mobile: 305 },
-    { month: "March", mobile: 237 },
-    { month: "April", mobile: 73 },
-    { month: "May", mobile: 103 },
-    { month: "June", mobile: 94 },
-    { month: "July", mobile: 300 },
-    { month: "August", mobile: 300 },
-    { month: "September", mobile: 250 },
-    { month: "October", mobile: 390 },
-    { month: "November", mobile: 280 },
-    { month: "December", mobile: 350 },
-  ];
-  const chartConfig = {
-    desktop: {
-      label: "mobile",
-      color: "var(--chart-1)",
-    },
-  };
+  const [chartData, setChartData] = useState<{ alpha: number; Cm: number }[]>(
+    [],
+  );
+
   //fechar e abrir painéis laterais
   const [geometriaOpen, setGeometriaOpen] = useState(true);
   const [aerodinamicaOpen, setAerodinamicaOpen] = useState(true);
+  const [graphicOpen, setGraphicOpen] = useState(true);
 
   const [params, setparams] = useState<SimulationParams>({
     Xcg: 0,
@@ -78,10 +58,24 @@ const Simulacao: React.FC = () => {
     Cm_ac: 0,
     Cl_0: 0,
     Cl_alpha: 0,
+    alphaMin: -5,
+    alphaMax: 15,
+    alphaStep: 1,
   });
   const handleChange = (field: keyof typeof params, value: number) => {
     setparams((prev) => ({ ...prev, [field]: value }));
   };
+
+  useEffect(() => {
+    if (params.cw > 0 && params.Sw > 0) {
+      const results = runSimulation(params);
+      setChartData(results);
+    }
+  }, [params]);
+
+  const equilibrio = chartData.find(
+    (p, i) => i > 0 && p.Cm * chartData[i - 1].Cm <= 0,
+  );
 
   return (
     <div className="min-h-screen p-2 flex flex-row bg-gray-100">
@@ -105,102 +99,73 @@ const Simulacao: React.FC = () => {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ChartContainer config={chartConfig}>
+            <ChartContainer
+              config={{
+                Cm: {
+                  label: "Cm",
+                  color: "var(--chart-1)",
+                },
+              }}
+            >
               <AreaChart
-                accessibilityLayer
+                width={600}
+                height={300}
                 data={chartData}
-                margin={{
-                  left: 12,
-                  right: 12,
-                }}
+                margin={{ left: 12, right: 12 }}
               >
-                <CartesianGrid vertical={false} />
+                <CartesianGrid strokeDasharray="3 3" />
+
+                {/* Eixo X */}
                 <XAxis
-                  dataKey="month"
-                  tickLine={false}
-                  axisLine={false}
-                  tickMargin={8}
-                  tickFormatter={(value) => value.slice(0, 3)}
+                  dataKey="alpha"
+                  domain={["dataMin - 1", "dataMax + 1"]}
+                  label={{
+                    value: "α (graus)",
+                    position: "insideBottom",
+                    offset: -5,
+                  }}
                 />
+
+                {/* Eixo Y */}
+                <YAxis />
+
+                {/* Linha Cm = 0 */}
+                <ReferenceLine
+                  y={0}
+                  stroke="red"
+                  strokeDasharray="4 4"
+                  label={{ value: "Cm = 0", position: "right" }}
+                />
+
+                {/* Ponto de equilíbrio */}
+                {equilibrio && (
+                  <ReferenceDot
+                    x={equilibrio.alpha}
+                    y={equilibrio.Cm}
+                    r={6}
+                    fill="red"
+                    stroke="white"
+                  />
+                )}
+
+                {/* Curva Cm */}
+                <Area
+                  type="monotone"
+                  dataKey="Cm"
+                  stroke="#223b80"
+                  fill="#223b80"
+                  fillOpacity={0.3}
+                />
+
                 <ChartTooltip
                   cursor={false}
                   content={<ChartTooltipContent indicator="line" />}
                 />
-                <Area
-                  dataKey="mobile"
-                  type="natural"
-                  fill="var(--color-desktop)"
-                  fillOpacity={0.4}
-                  stroke="var(--color-desktop)"
-                />
               </AreaChart>
             </ChartContainer>
           </CardContent>
-          <CardFooter>
-            <div className="flex w-full items-start gap-2 text-sm">
-              <div className="grid gap-2">
-                <div className="flex items-center gap-2 leading-none font-medium">
-                  Trending up by 5.2% this month{" "}
-                  <TrendingUp className="h-4 w-4" />
-                </div>
-                <div className="text-muted-foreground flex items-center gap-2 leading-none">
-                  January - June 2024
-                </div>
-              </div>
-            </div>
-          </CardFooter>
         </Card>
-        {/* <div className="flex-1 flex items-center"> */}
-        {/* Eixos */}
-        {/* <svg width="900" height="510" className=""> */}
-        {/* Eixo X */}
-        {/* <line
-              x1="100"
-              y1="490"
-              x2="860"
-              y2="490"
-              stroke="black"
-              strokeWidth="2"
-            />
-            <text x="850" y="495" fontSize="18" fontWeight="bold">
-              &gt;
-            </text> */}
 
-        {/* Eixo Y */}
-        {/* <line
-              x1="101"
-              y1="490"
-              x2="101"
-              y2="40"
-              stroke="black"
-              strokeWidth="2"
-            />
-            <text x="93.3" y="53" fontSize="22" fontWeight="bold">
-              ^
-            </text> */}
-
-        {/* Labels */}
-        {/* <text x="70" y="65" fontWeight="">
-              Cm
-            </text>
-            <text x="832" y="509" fontSize="20" fontWeight="">
-              α
-            </text>
-            <text x="670" y="60" fontSize="18">
-              Ponto de Equil.:
-            </text>
-            <line
-              x1="795"
-              y1="60"
-              x2="855"
-              y2="60"
-              stroke="black"
-              strokeWidth="1"
-            />
-          </svg> */}
-
-        {/* <span className="absolute top-1 right-1">Ponto de Equil.:</span> */}
-        {/* </div> */}
         {/* Botões inferiores */}
         <div className="flex justify-evenly p-3 bg-white rounded-xl shadow-lg m-4">
           <Link
@@ -217,6 +182,36 @@ const Simulacao: React.FC = () => {
       {/* Painel lateral */}
       <div className="w-[300px] bg-white shadow-xl p-3 border border-orange-300 rounded-lg flex flex-col h-[calc(100vh-1.8rem)]">
         <div className="flex-1 overflow-y-auto pr-2 scroll-invisible">
+          <div
+            className="flex justify-between items-center cursor-pointer border-b border-orange-300 mb-4 flex-shrink-0"
+            onClick={() => setGraphicOpen(!graphicOpen)}
+          >
+            <h2 className="text-xl font-semibold text-gray-800">
+              Ajuste do Gráfico
+            </h2>
+            <svg
+              className={`w-5 h-5 text-gray-600 transition-transform duration-300 ${
+                graphicOpen ? "rotate-180" : ""
+              }`}
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 9l-7 7-7-7"
+              ></path>
+            </svg>
+          </div>
+
+          {graphicOpen && (
+            <form className="flex flex-col gap-4 relative">
+              <GraphAdjustmentPanel params={params} onChange={handleChange} />
+            </form>
+          )}
           {/* Cabecalho "Geometria" */}
           <div
             className="flex justify-between items-center cursor-pointer border-b border-orange-300 mb-4 flex-shrink-0"
@@ -243,150 +238,7 @@ const Simulacao: React.FC = () => {
           {/* Parametros Geometria */}
           {geometriaOpen && (
             <form className="flex flex-col gap-4 relative">
-              <label className="flex flex-col">
-                <span className="text-sm font-medium text-gray-700">
-                  Posição do centro de gravidade (Xcg):
-                </span>
-                <div className="flex items-center">
-                  <input
-                    type="number"
-                    value={params.Xcg}
-                    onChange={(e) =>
-                      handleChange("Xcg", parseFloat(e.target.value))
-                    }
-                    className="w-[120px] p-2 border border-gray-300 rounded-md bg-gray-100"
-                  />
-                  <span className="ml-2 text-gray-500">m</span>
-                </div>
-              </label>
-              <label className="flex flex-col">
-                <span className="text-sm font-medium text-gray-700">
-                  Posição do centro aerodinâmico da asa (Xac_w):
-                </span>
-                <div className="flex items-center">
-                  <input
-                    type="number"
-                    value={params.Xac_w}
-                    onChange={(e) =>
-                      handleChange("Xac_w", parseFloat(e.target.value))
-                    }
-                    className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <span className="ml-2 text-gray-500">m</span>
-                </div>
-              </label>
-              <label className="flex flex-col">
-                <span className="text-sm font-medium text-gray-700">
-                  Corda média da asa (cw):
-                </span>
-                <div className="flex items-center">
-                  <input
-                    type="number"
-                    value={params.cw}
-                    onChange={(e) =>
-                      handleChange("cw", parseFloat(e.target.value))
-                    }
-                    className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <span className="ml-2 text-gray-500">m</span>
-                </div>
-              </label>
-              <label className="flex flex-col">
-                <span className="text-sm font-medium text-gray-700">
-                  Ângulo de incidência da asa (iw):
-                </span>
-                <div className="flex items-center">
-                  <input
-                    type="number"
-                    value={params.iw}
-                    onChange={(e) =>
-                      handleChange("iw", parseFloat(e.target.value))
-                    }
-                    className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <span className="ml-2 text-gray-500">°</span>
-                </div>
-              </label>
-              <label className="flex flex-col">
-                <span className="text-sm font-medium text-gray-700">
-                  Área da asa (Sw):
-                </span>
-                <div className="flex items-center">
-                  <input
-                    type="number"
-                    value={params.Sw}
-                    onChange={(e) =>
-                      handleChange("Sw", parseFloat(e.target.value))
-                    }
-                    className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <span className="ml-2 text-gray-500">m²</span>
-                </div>
-              </label>
-              <label className="flex flex-col">
-                <span className="text-sm font-medium text-gray-700">
-                  Corda média da cauda (ct):
-                </span>
-                <div className="flex items-center">
-                  <input
-                    type="number"
-                    value={params.ct}
-                    onChange={(e) =>
-                      handleChange("ct", parseFloat(e.target.value))
-                    }
-                    className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <span className="ml-2 text-gray-500">m</span>
-                </div>
-              </label>
-              <label className="flex flex-col">
-                <span className="text-sm font-medium text-gray-700">
-                  Ângulo de incidência da cauda (it):
-                </span>
-                <div className="flex items-center">
-                  <input
-                    type="number"
-                    value={params.it}
-                    onChange={(e) =>
-                      handleChange("it", parseFloat(e.target.value))
-                    }
-                    className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <span className="ml-2 text-gray-500">°</span>
-                </div>
-              </label>
-              <label className="flex flex-col">
-                <span className="text-sm font-medium text-gray-700">
-                  Área da cauda (St):
-                </span>
-                <div className="flex items-center">
-                  <input
-                    type="number"
-                    value={params.St}
-                    onChange={(e) =>
-                      handleChange("St", parseFloat(e.target.value))
-                    }
-                    className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <span className="ml-2 text-gray-500">m²</span>
-                </div>
-              </label>
-              <label className="flex flex-col">
-                <span className="text-sm font-medium text-gray-700">
-                  Braço da cauda (lt):
-                </span>
-                <div className="flex items-center">
-                  <input
-                    type="number"
-                    value={params.lt}
-                    onChange={(e) =>
-                      handleChange("lt", parseFloat(e.target.value))
-                    }
-                    className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <span className="ml-2 text-gray-500">m</span>
-                </div>
-              </label>
+              <GeometriaPanel params={params} onChange={handleChange} />
 
               <div className="mt-4 pt-4 border-t border-gray-200" />
               <span className="text-orange-600 font-semibold">
@@ -449,52 +301,8 @@ const Simulacao: React.FC = () => {
           {/* Parametros Aerodinamica */}
           {aerodinamicaOpen && (
             <form className="flex flex-col gap-4 relative">
-              <label className="flex flex-col">
-                <span className="text-sm font-medium text-gray-700">
-                  Momento no centro aerodinamico (Cm_ac):
-                </span>
-                <div className="flex items-center">
-                  <input
-                    type="number"
-                    value={params.Cm_ac}
-                    onChange={(e) =>
-                      handleChange("Cm_ac", parseFloat(e.target.value))
-                    }
-                    className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
-                  <span className="ml-2 text-gray-500">kg.m/s</span>
-                </div>
-              </label>
-              <label className="flex flex-col">
-                <span className="text-sm font-medium text-gray-700">
-                  Sustentacao em α=0(Cl_0):
-                </span>
-                <div className="flex items-center">
-                  <input
-                    type="number"
-                    value={params.Cl_0}
-                    onChange={(e) =>
-                      handleChange("Cl_0", parseFloat(e.target.value))
-                    }
-                    className="w-[120px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              </label>
-              <label className="flex flex-col">
-                <span className="text-sm font-medium text-gray-700">
-                  Derivada de Cl em funcao de α(Cl_alpha):
-                </span>
-                <div className="flex items-center">
-                  <input
-                    type="number"
-                    value={params.Cl_alpha}
-                    onChange={(e) =>
-                      handleChange("Cl_alpha", parseFloat(e.target.value))
-                    }
-                    className="w-[270px] bg-gray-100 p-2 border border-gray-300 rounded-md focus:ring-blue-500 focus:border-blue-500"
-                  />
-                </div>
-              </label>
+              <AerodinamicaPanel params={params} onChange={handleChange} />
+
               <div className="mt-4 pt-4 border-t border-gray-200">
                 <span className="text-orange-600 font-semibold">
                   Analise de C em funcao de α
@@ -516,92 +324,3 @@ const Simulacao: React.FC = () => {
 };
 
 export default Simulacao;
-
-// "use client";
-// import { TrendingUp } from "lucide-react";
-// import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
-// import {
-//   Card,
-//   CardContent,
-//   CardDescription,
-//   CardFooter,
-//   CardHeader,
-//   CardTitle,
-// } from "@/components/ui/card";
-// import {
-//   ChartConfig,
-//   ChartContainer,
-//   ChartTooltip,
-//   ChartTooltipContent,
-// } from "@/components/ui/chart";
-// export const description = "A simple area chart";
-// const chartData = [
-//   { month: "January", desktop: 186 },
-//   { month: "February", desktop: 305 },
-//   { month: "March", desktop: 237 },
-//   { month: "April", desktop: 73 },
-//   { month: "May", desktop: 209 },
-//   { month: "June", desktop: 214 },
-// ];
-// const chartConfig = {
-//   desktop: {
-//     label: "Desktop",
-//     color: "var(--chart-1)",
-//   },
-// } satisfies ChartConfig;
-// export function ChartAreaDefault() {
-//   return (
-//     <Card>
-//       <CardHeader>
-//         <CardTitle>Area Chart</CardTitle>
-//         <CardDescription>
-//           Showing total visitors for the last 6 months
-//         </CardDescription>
-//       </CardHeader>
-//       <CardContent>
-//         <ChartContainer config={chartConfig}>
-//           <AreaChart
-//             accessibilityLayer
-//             data={chartData}
-//             margin={{
-//               left: 12,
-//               right: 12,
-//             }}
-//           >
-//             <CartesianGrid vertical={false} />
-//             <XAxis
-//               dataKey="month"
-//               tickLine={false}
-//               axisLine={false}
-//               tickMargin={8}
-//               tickFormatter={(value) => value.slice(0, 3)}
-//             />
-//             <ChartTooltip
-//               cursor={false}
-//               content={<ChartTooltipContent indicator="line" />}
-//             />
-//             <Area
-//               dataKey="desktop"
-//               type="natural"
-//               fill="var(--color-desktop)"
-//               fillOpacity={0.4}
-//               stroke="var(--color-desktop)"
-//             />
-//           </AreaChart>
-//         </ChartContainer>
-//       </CardContent>
-//       <CardFooter>
-//         <div className="flex w-full items-start gap-2 text-sm">
-//           <div className="grid gap-2">
-//             <div className="flex items-center gap-2 leading-none font-medium">
-//               Trending up by 5.2% this month <TrendingUp className="h-4 w-4" />
-//             </div>
-//             <div className="text-muted-foreground flex items-center gap-2 leading-none">
-//               January - June 2024
-//             </div>
-//           </div>
-//         </div>
-//       </CardFooter>
-//     </Card>
-//   );
-// }

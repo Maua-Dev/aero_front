@@ -1,4 +1,4 @@
-export const defaultParams = {
+export const SimulationParams = {
   Xcg: 0,
   Xac_w: 0,
   cw: 0,
