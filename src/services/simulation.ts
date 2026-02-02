@@ -14,13 +14,9 @@ export const SimulationService = {
 
   async createSimulation(data: SimulationParams) {
     try {
-      const response = await userMss.post(
-        "/create-cm-simulation",
-        {
-          data,
-        },
-        { headers: { "Content-Type": "application/json" } },
-      );
+      const response = await userMss.post("/create-cm-simulation", data, {
+        headers: { "Content-Type": "application/json" },
+      });
       return response.data;
     } catch (error) {
       console.error("Erro ao criar simulação:", error);

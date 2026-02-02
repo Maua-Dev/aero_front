@@ -1,5 +1,5 @@
 //disable eslint rule for this file
-/* eslint-disable @typescript-eslint/naming-convention */
+
 //disable prettier for this file
 /* prettier-ignore */
 import React, { useEffect } from "react";
@@ -58,41 +58,55 @@ const Simulacao: React.FC = () => {
   const createSimulation = useCreateSimulation();
 
   const handleCreateSimulation = () => {
-    createSimulation.mutate(params);
+    // parsing all params to float before sending
+    const sanitizedParams = sanitizeParams(params);
+    createSimulation.mutate(sanitizedParams);
   };
 
   const [params, setparams] = useState<SimulationParams>({
-    xcg: 0,
-    xac_w: 0,
-    cw: 0,
-    iw: 0,
-    sw: 0,
-    ct: 0,
-    it: 0,
-    st: 0,
-    lt: 0,
-    cm_ac: 0,
-    cl_0: 0,
-    cl_alpha: 0,
-    alphaMin: -5,
-    alphaMax: 15,
-    alphaStep: 1,
+    xcg: 0.0,
+    xac_w: 0.0,
+    cw: 0.0,
+    iw: 0.0,
+    sw: 0.0,
+    ct: 0.0,
+    it: 0.0,
+    st: 0.0,
+    lt: 0.0,
+    cm_ac: 0.0,
+    cl_0: 0.0,
+    cl_alpha: 0.0,
+    alphaMin: -5.0,
+    alphaMax: 15.0,
+    alphaStep: 1.0,
   });
 
   const clamp = (value: number, min: number, max: number) =>
     Math.min(Math.max(value, min), max);
 
+  // Ensure all values remain floats
   const handleChange = (field: keyof SimulationParams, value: number) => {
     const limits = PARAM_LIMITS[field];
-
-    if (!limits || Number.isNaN(value)) return;
-
-    const safeValue = clamp(value, limits.min, limits.max);
-
+    // Always cast to float
+    const floatValue =
+      typeof value === "string" ? parseFloat(value) : Number(value);
+    if (!limits || Number.isNaN(floatValue)) return;
+    const safeValue = clamp(floatValue, limits.min, limits.max);
     setparams((prev) => ({
       ...prev,
       [field]: safeValue,
     }));
+  };
+
+  // parse everything to float
+  const sanitizeParams = (params: SimulationParams): SimulationParams => {
+    const sanitized: SimulationParams = { ...params };
+    for (const key in sanitized) {
+      const value = sanitized[key as keyof SimulationParams];
+      sanitized[key as keyof SimulationParams] =
+        typeof value === "string" ? parseFloat(value) : Number(value);
+    }
+    return sanitized;
   };
 
   useEffect(() => {
