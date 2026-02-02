@@ -1,3 +1,7 @@
+//disable eslint rule for this file
+/* eslint-disable @typescript-eslint/naming-convention */
+//disable prettier for this file
+/* prettier-ignore */
 import React, { useEffect } from "react";
 import {
   Area,
@@ -12,7 +16,7 @@ import {
 import {
   Card,
   CardContent,
-  CardDescription,
+  //CardDescription,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
@@ -31,50 +35,75 @@ import { GeometriaPanel } from "@/components/ui/geometry";
 import { AerodinamicaPanel } from "@/components/ui/aerodynamics";
 import { runSimulation } from "@/utils/calculations";
 import { GraphAdjustmentPanel } from "@/components/ui/graph_adjustment";
+import { FaHome, FaSave } from "react-icons/fa";
 //import { runSimulation } from "src/utils/calculations";
-
+import { useCreateSimulation } from "@/hooks/use_simulation";
 import type { SimulationParams } from "@/types/simulation";
+import { PARAM_LIMITS } from "../types/limits";
 
 const Simulacao: React.FC = () => {
-  const [chartData, setChartData] = useState<{ alpha: number; Cm: number }[]>(
-    [],
-  );
+  const [chartData, setChartData] = useState<
+    {
+      alpha: number;
+      cm_total: number;
+      cm_wing: number;
+      cm_tail: number;
+    }[]
+  >([]);
 
   //fechar e abrir painéis laterais
   const [geometriaOpen, setGeometriaOpen] = useState(true);
   const [aerodinamicaOpen, setAerodinamicaOpen] = useState(true);
   const [graphicOpen, setGraphicOpen] = useState(true);
+  const createSimulation = useCreateSimulation();
+
+  const handleCreateSimulation = () => {
+    createSimulation.mutate(params);
+  };
 
   const [params, setparams] = useState<SimulationParams>({
-    Xcg: 0,
-    Xac_w: 0,
+    xcg: 0,
+    xac_w: 0,
     cw: 0,
     iw: 0,
-    Sw: 0,
+    sw: 0,
     ct: 0,
     it: 0,
-    St: 0,
+    st: 0,
     lt: 0,
-    Cm_ac: 0,
-    Cl_0: 0,
-    Cl_alpha: 0,
+    cm_ac: 0,
+    cl_0: 0,
+    cl_alpha: 0,
     alphaMin: -5,
     alphaMax: 15,
     alphaStep: 1,
   });
-  const handleChange = (field: keyof typeof params, value: number) => {
-    setparams((prev) => ({ ...prev, [field]: value }));
+
+  const clamp = (value: number, min: number, max: number) =>
+    Math.min(Math.max(value, min), max);
+
+  const handleChange = (field: keyof SimulationParams, value: number) => {
+    const limits = PARAM_LIMITS[field];
+
+    if (!limits || Number.isNaN(value)) return;
+
+    const safeValue = clamp(value, limits.min, limits.max);
+
+    setparams((prev) => ({
+      ...prev,
+      [field]: safeValue,
+    }));
   };
 
   useEffect(() => {
-    if (params.cw > 0 && params.Sw > 0) {
+    if (params.cw > 0 && params.sw > 0) {
       const results = runSimulation(params);
       setChartData(results);
     }
   }, [params]);
 
   const equilibrio = chartData.find(
-    (p, i) => i > 0 && p.Cm * chartData[i - 1].Cm <= 0,
+    (p, i) => i > 0 && p.cm_total * chartData[i - 1].cm_total <= 0,
   );
 
   return (
@@ -91,12 +120,12 @@ const Simulacao: React.FC = () => {
       {/* Conteúdo principal */}
       <div className="flex flex-col flex-1">
         {/* Área do gráfico */}
-        <Card>
+        <Card className="max-w-[1020px] h-[625px]">
           <CardHeader>
-            <CardTitle>Area Chart</CardTitle>
-            <CardDescription>
+            <CardTitle>Simulação</CardTitle>
+            {/* <CardDescription>
               Showing total visitors for the last 6 months
-            </CardDescription>
+            </CardDescription> */}
           </CardHeader>
           <CardContent>
             <ChartContainer
@@ -111,14 +140,14 @@ const Simulacao: React.FC = () => {
                 width={600}
                 height={300}
                 data={chartData}
-                margin={{ left: 12, right: 12 }}
+                margin={{ left: 16, right: 24, top: 16, bottom: 32 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
 
                 {/* Eixo X */}
                 <XAxis
                   dataKey="alpha"
-                  domain={["dataMin - 1", "dataMax + 1"]}
+                  domain={["dataMin - 2", "dataMax + 5"]}
                   label={{
                     value: "α (graus)",
                     position: "insideBottom",
@@ -141,22 +170,49 @@ const Simulacao: React.FC = () => {
                 {equilibrio && (
                   <ReferenceDot
                     x={equilibrio.alpha}
-                    y={equilibrio.Cm}
+                    y={equilibrio.cm_total}
                     r={6}
                     fill="red"
+                    w-
                     stroke="white"
+                    label={{
+                      value: `α = ${equilibrio.alpha}°`,
+                      position: "top",
+                      fill: "#000",
+                      fontSize: 12,
+                    }}
                   />
                 )}
 
                 {/* Curva Cm */}
                 <Area
                   type="monotone"
-                  dataKey="Cm"
+                  dataKey="Cm_total"
                   stroke="#223b80"
                   fill="#223b80"
                   fillOpacity={0.3}
+                  name="Cm Total"
                 />
 
+                {/* Asa somente */}
+                <Area
+                  type="monotone"
+                  dataKey="Cm_wing"
+                  stroke="#16a34a"
+                  fill="#16a34a"
+                  fillOpacity={0.15}
+                  name="Asa"
+                />
+
+                {/* Cauda somente */}
+                <Area
+                  type="monotone"
+                  dataKey="Cm_tail"
+                  stroke="#dc2626"
+                  fill="#dc2626"
+                  fillOpacity={0.15}
+                  name="Cauda"
+                />
                 <ChartTooltip
                   cursor={false}
                   content={<ChartTooltipContent indicator="line" />}
@@ -170,17 +226,26 @@ const Simulacao: React.FC = () => {
         <div className="flex justify-evenly p-3 bg-white rounded-xl shadow-lg m-4">
           <Link
             to={"/"}
-            className="flex items-center gap-4 px-12 bg-[#223b80] text-white font-semibold rounded-lg shadow-md"
+            className="flex items-center gap-4 px-12 bg-[#223b80] text-white font-semibold cursor-pointer rounded-lg shadow-md"
           >
-            Home <span className="text-lg">🏠</span>
+            Home{" "}
+            <span className="text-lg cursor-pointer">
+              <FaHome />
+            </span>
           </Link>
-          <button className="flex items-center gap-4 px-12 bg-[#223b80] text-white font-semibold rounded-lg shadow-md">
-            Salvar <span className="text-lg">💾</span>
+          <button
+            onClick={handleCreateSimulation}
+            className="flex items-center gap-4 px-12 bg-[#223b80] text-white font-semibold cursor-pointer rounded-lg shadow-md"
+          >
+            Salvar{" "}
+            <span className="text-lg cursor-pointer">
+              <FaSave />
+            </span>
           </button>
         </div>
       </div>
       {/* Painel lateral */}
-      <div className="w-[300px] bg-white shadow-xl p-3 border border-orange-300 rounded-lg flex flex-col h-[calc(100vh-1.8rem)]">
+      <div className="w-[300px] h-[625px] bg-white shadow-xl p-3 border border-orange-300 rounded-lg flex flex-col">
         <div className="flex-1 overflow-y-auto pr-2 scroll-invisible">
           <div
             className="flex justify-between items-center cursor-pointer border-b border-orange-300 mb-4 flex-shrink-0"
@@ -244,7 +309,7 @@ const Simulacao: React.FC = () => {
               <span className="text-orange-600 font-semibold">
                 Diagrama da asa:
               </span>
-              <div className="flex item-center">
+              <div className="flex item-center cursor-pointer">
                 <img
                   src={diagramaAsa}
                   alt="diagrama da asa"

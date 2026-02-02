@@ -4,8 +4,19 @@ import lupa from "../assets/lupa.png";
 import casa from "../assets/casa.png";
 import aviao from "../assets/aviao.webp";
 import { Link } from "react-router-dom";
+import { useAllSimulation } from "@/hooks/use_simulation";
 
 const Historico: React.FC = () => {
+  const { data: simulations, isLoading, isError } = useAllSimulation();
+
+  if (isLoading) {
+    return <div>Carregando simulações...</div>;
+  }
+  if (isError) {
+    return <div>Erro ao carregar simulações.</div>;
+  }
+  console.log(simulations);
+
   return (
     <div className="min-h-screen relative flex flex-col items-center justify-center bg-white overflow-hidden">
       {/* logo */}
