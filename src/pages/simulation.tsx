@@ -130,8 +130,8 @@ const Simulacao: React.FC = () => {
           <CardContent>
             <ChartContainer
               config={{
-                Cm: {
-                  label: "Cm",
+                cm: {
+                  label: "cm",
                   color: "var(--chart-1)",
                 },
               }}
@@ -163,7 +163,7 @@ const Simulacao: React.FC = () => {
                   y={0}
                   stroke="red"
                   strokeDasharray="4 4"
-                  label={{ value: "Cm = 0", position: "right" }}
+                  label={{ value: "cm = 0", position: "right" }}
                 />
 
                 {/* Ponto de equilíbrio */}
@@ -187,17 +187,17 @@ const Simulacao: React.FC = () => {
                 {/* Curva Cm */}
                 <Area
                   type="monotone"
-                  dataKey="Cm_total"
+                  dataKey="cm_total"
                   stroke="#223b80"
                   fill="#223b80"
                   fillOpacity={0.3}
-                  name="Cm Total"
+                  name="cm Total"
                 />
 
                 {/* Asa somente */}
                 <Area
                   type="monotone"
-                  dataKey="Cm_wing"
+                  dataKey="cm_wing"
                   stroke="#16a34a"
                   fill="#16a34a"
                   fillOpacity={0.15}
@@ -207,7 +207,7 @@ const Simulacao: React.FC = () => {
                 {/* Cauda somente */}
                 <Area
                   type="monotone"
-                  dataKey="Cm_tail"
+                  dataKey="cm_tail"
                   stroke="#dc2626"
                   fill="#dc2626"
                   fillOpacity={0.15}
