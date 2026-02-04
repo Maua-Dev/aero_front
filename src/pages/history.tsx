@@ -1,44 +1,77 @@
-import React from "react";
+import React, { useState } from "react";
 import logo from "../assets/logo.png";
 import lupa from "../assets/lupa.png";
 import casa from "../assets/casa.png";
-import aviao from "../assets/aviao.webp";
-import { Link } from "react-router-dom";
-import { useAllSimulation } from "@/hooks/use_simulation";
+import { Link, useNavigate } from "react-router-dom";
+import { useAllSimulation, useDeleteSimulation } from "@/hooks/use_simulation";
 import SimulationCard from "../components/ui/simulation_card";
+import type { Simulation } from "@/context/simulation_context";
+import CustomModal from "@/components/customModal";
 
 const Historico: React.FC = () => {
-  const { data: simulations, isLoading, isError } = useAllSimulation();
+  const [selectedDelete, setSelectedDelete] = useState<string | null>(null);
+  const { data: simulations, isLoading, isError, refetch } = useAllSimulation();
+  const deleteSimulationMutation = useDeleteSimulation();
+  const navigate = useNavigate();
 
   if (isLoading) {
-    return <div>Carregando simulações...</div>;
+    return (
+      <body className="h-screen w-screen flex justify-center items-center">
+        <div className="max-w-xs mx-auto gap-10 flex items-center justify-center">
+          <div className="text-9xl duration-300 animate-bounce">.</div>
+          <div
+            className="text-9xl duration-300 animate-bounce"
+            style={{ animationDelay: "150ms" }}
+          >
+            .
+          </div>
+          <div
+            className="text-9xl duration-300 animate-bounce"
+            style={{ animationDelay: "300ms" }}
+          >
+            .
+          </div>
+        </div>
+      </body>
+    );
   }
   if (isError) {
     return <div>Erro ao carregar simulações.</div>;
   }
-  console.log(simulations);
-
-  // Usa os dados reais da API, se disponíveis
-  const displaySimulations =
-    simulations && simulations.length > 0
-      ? simulations.map((sim: any, index: number) => ({
-          id: sim.id,
-          title: sim.name || `Simulação ${index + 1}`,
-          description: sim.description || "Em breve",
-          date: sim.createdAt,
-          status: sim.status,
-          imageUrl: sim.imageUrl || aviao,
-        }))
-      : [];
+  console.log(simulations.cm_simulations);
 
   const handleCardClick = (simulationId: string) => {
     // Navegar para os detalhes da simulação
     console.log("Clicou na simulação:", simulationId);
-    // Exemplo: navigate(`/simulacao/${simulationId}`);
+    navigate(`/simulacao/${simulationId}`);
   };
 
   return (
     <div className="min-h-screen relative flex flex-col items-center justify-center bg-white overflow-hidden">
+      <CustomModal
+        isOpen={selectedDelete !== null}
+        onClose={() => setSelectedDelete(null)}
+        title={"Tem certeza que deseja excluir esta simulação?"}
+        children={
+          <div>
+            <button
+              onClick={() => {
+                if (selectedDelete) {
+                  deleteSimulationMutation.mutate(selectedDelete, {
+                    onSuccess: () => {
+                      refetch();
+                    },
+                  });
+                  setSelectedDelete(null);
+                }
+              }}
+              className="mt-4 bg-red-600 text-white px-4 py-2 rounded"
+            >
+              Confirmar Exclusão
+            </button>
+          </div>
+        }
+      ></CustomModal>
       {/* logo */}
       <img
         src={logo}
@@ -65,22 +98,29 @@ const Historico: React.FC = () => {
 
       {/* Grid de simulações com componente reciclável */}
       <div className="grid grid-cols-3 gap-15 p-6 absolute top-30 left-70">
-        {displaySimulations.length === 0 ? (
+        {simulations.cm_simulations.length === 0 ? (
           <div className="col-span-3 text-center text-gray-500">
             Nenhuma simulação encontrada.
           </div>
         ) : (
-          displaySimulations.map((simulation: any, index: number) => (
-            <SimulationCard
-              key={simulation.id || index}
-              title={simulation.title}
-              description={simulation.description}
-              imageUrl={simulation.imageUrl}
-              date={simulation.date}
-              status={simulation.status}
-              onClick={() => simulation.id && handleCardClick(simulation.id)}
-            />
-          ))
+          simulations.cm_simulations.map(
+            (simulation: Simulation, index: number) => (
+              <SimulationCard
+                key={simulation.simulation_id || index}
+                title={
+                  simulation.simulation_id
+                    ? `Simulação ${simulation.simulation_id}`
+                    : `Simulação ${index + 1}`
+                }
+                simulation={simulation}
+                onClick={() =>
+                  simulation.simulation_id &&
+                  handleCardClick(simulation.simulation_id)
+                }
+                onDelete={(id: string) => setSelectedDelete(id)}
+              />
+            ),
+          )
         )}
       </div>
 

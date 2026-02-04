@@ -1,3 +1,4 @@
+import type { Simulation } from "@/context/simulation_context";
 import { userMss } from "../http/api";
 import type { SimulationParams } from "@/types/simulation";
 
@@ -26,11 +27,8 @@ export const SimulationService = {
 
   async deleteSimulation(simulationId: string) {
     try {
-      const response = await userMss.post(
-        "/delete-cm-simulation",
-        {
-          simulation_id: simulationId,
-        },
+      const response = await userMss.delete(
+        `/delete-cm-simulation?simulation_id=${simulationId}`,
         { headers: { "Content-Type": "application/json" } },
       );
       return response.data;
@@ -40,19 +38,26 @@ export const SimulationService = {
     }
   },
 
-  async updateSimulation(simulationId: string, data: SimulationParams) {
+  async updateSimulation(data: Simulation) {
     try {
-      const response = await userMss.post(
-        "/update-cm-simulation",
-        {
-          simulation_id: simulationId,
-          updated_simulation: data,
-        },
-        { headers: { "Content-Type": "application/json" } },
-      );
+      const response = await userMss.put("/update-cm-simulation", data, {
+        headers: { "Content-Type": "application/json" },
+      });
       return response.data;
     } catch (error) {
       console.error("Erro ao atualizar simulação:", error);
+      throw error;
+    }
+  },
+
+  async getSimulationById(simulationId: string) {
+    try {
+      const response = await userMss.get("/get-cm-simulation", {
+        params: { simulation_id: simulationId },
+      });
+      return response.data;
+    } catch (error) {
+      console.error("Erro ao buscar simulação por ID:", error);
       throw error;
     }
   },

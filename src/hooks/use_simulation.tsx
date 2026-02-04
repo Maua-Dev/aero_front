@@ -1,8 +1,10 @@
+import type { Simulation } from "@/context/simulation_context";
 import { SimulationService } from "@/services/simulation";
 import type { SimulationParams } from "@/types/simulation";
 import { useQuery } from "@tanstack/react-query";
 import { useMutation } from "@tanstack/react-query";
 import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "react-toastify";
 
 export function useAllSimulation() {
   return useQuery({
@@ -37,11 +39,11 @@ export function useDeleteSimulation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["allSimulations"] });
-      alert("Simulação excluída com sucesso!");
+      toast.success("Simulação excluída com sucesso!");
     },
     onError: (error) => {
       console.error(error);
-      alert("Erro ao excluir simulação.");
+      toast.error("Erro ao excluir simulação.");
     },
   });
 }
@@ -49,18 +51,12 @@ export function useDeleteSimulation() {
 export function useUpdateSimulation() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async ({
-      simulationId,
-      data,
-    }: {
-      simulationId: string;
-      data: SimulationParams;
-    }) => {
-      return await SimulationService.updateSimulation(simulationId, data);
+    mutationFn: async ({ data }: { data: Simulation }) => {
+      return await SimulationService.updateSimulation(data);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["allSimulations"] });
-      alert("Simulação atualizada com sucesso!");
+      toast.success("Simulação atualizada com sucesso!");
     },
     onError: (error) => {
       console.error(error);

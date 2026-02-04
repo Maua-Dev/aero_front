@@ -37,11 +37,18 @@ import { runSimulation } from "@/utils/calculations";
 import { GraphAdjustmentPanel } from "@/components/ui/graph_adjustment";
 import { FaHome, FaSave } from "react-icons/fa";
 //import { runSimulation } from "src/utils/calculations";
-import { useCreateSimulation } from "@/hooks/use_simulation";
+import {
+  useCreateSimulation,
+  useUpdateSimulation,
+} from "@/hooks/use_simulation";
 import type { SimulationParams } from "@/types/simulation";
 import { PARAM_LIMITS } from "../types/limits";
+import { SimulationService } from "@/services/simulation";
 
 const Simulacao: React.FC = () => {
+  // Getting from URL params
+  const simulationId = window.location.pathname.split("/").pop();
+
   const [chartData, setChartData] = useState<
     {
       alpha: number;
@@ -55,12 +62,20 @@ const Simulacao: React.FC = () => {
   const [geometriaOpen, setGeometriaOpen] = useState(true);
   const [aerodinamicaOpen, setAerodinamicaOpen] = useState(true);
   const [graphicOpen, setGraphicOpen] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
   const createSimulation = useCreateSimulation();
+  const updateSimulation = useUpdateSimulation();
 
   const handleCreateSimulation = () => {
-    // parsing all params to float before sending
-    const sanitizedParams = sanitizeParams(params);
-    createSimulation.mutate(sanitizedParams);
+    if (simulationId) {
+      const sanitizedParams = sanitizeParamsUpdate(params);
+      updateSimulation.mutate({
+        data: { ...sanitizedParams, simulation_id: simulationId },
+      });
+    } else {
+      const sanitizedParams = sanitizeParams(params);
+      createSimulation.mutate(sanitizedParams);
+    }
   };
 
   const [params, setparams] = useState<SimulationParams>({
@@ -80,6 +95,34 @@ const Simulacao: React.FC = () => {
     alphaMax: 15.0,
     alphaStep: 1.0,
   });
+
+  useEffect(() => {
+    if (simulationId) {
+      setIsLoading(true);
+      const simulation = SimulationService.getSimulationById(simulationId);
+      simulation.then((data) => {
+        const sim = data.cm_simulation;
+        setparams({
+          xcg: sim.xcg,
+          xac_w: sim.xac_w,
+          sw: sim.sw,
+          st: sim.st,
+          cw: sim.cw,
+          ct: sim.ct,
+          iw: sim.iw,
+          it: sim.it,
+          lt: sim.lt,
+          cm_ac: sim.cm_ac,
+          cl_0: sim.cl_0,
+          cl_alpha: sim.cl_alpha,
+          alphaMin: -5.0,
+          alphaMax: 15.0,
+          alphaStep: 1.0,
+        });
+      });
+      setIsLoading(false);
+    }
+  }, []);
 
   const clamp = (value: number, min: number, max: number) =>
     Math.min(Math.max(value, min), max);
@@ -109,6 +152,19 @@ const Simulacao: React.FC = () => {
     return sanitized;
   };
 
+  // parse everything to float and change keys for update should be new_xcg, new_xac_w, etc.
+  const sanitizeParamsUpdate = (params: SimulationParams): SimulationParams => {
+    const sanitized: SimulationParams = { ...params };
+    const updated: SimulationParams = {} as SimulationParams;
+    for (const key in sanitized) {
+      const value = sanitized[key as keyof SimulationParams];
+      const newKey = `new_${key}` as keyof SimulationParams;
+      updated[newKey] =
+        typeof value === "string" ? parseFloat(value) : Number(value);
+    }
+    return updated;
+  };
+
   useEffect(() => {
     if (params.cw > 0 && params.sw > 0) {
       const results = runSimulation(params);
@@ -122,6 +178,11 @@ const Simulacao: React.FC = () => {
 
   return (
     <div className="min-h-screen p-2 flex flex-row bg-gray-100">
+      {isLoading && (
+        <div className="absolute inset-0 bg-black bg-opacity-90 h-screen w-screen flex items-center justify-center z-50">
+          <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
+        </div>
+      )}
       {/* Logo */}
       {/*
       <img
