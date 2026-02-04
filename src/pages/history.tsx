@@ -5,6 +5,7 @@ import casa from "../assets/casa.png";
 import aviao from "../assets/aviao.webp";
 import { Link } from "react-router-dom";
 import { useAllSimulation } from "@/hooks/use_simulation";
+import SimulationCard from "../components/ui/simulation_card";
 
 const Historico: React.FC = () => {
   const { data: simulations, isLoading, isError } = useAllSimulation();
@@ -17,6 +18,25 @@ const Historico: React.FC = () => {
   }
   console.log(simulations);
 
+  // Usa os dados reais da API, se disponíveis
+  const displaySimulations =
+    simulations && simulations.length > 0
+      ? simulations.map((sim: any, index: number) => ({
+          id: sim.id,
+          title: sim.name || `Simulação ${index + 1}`,
+          description: sim.description || "Em breve",
+          date: sim.createdAt,
+          status: sim.status,
+          imageUrl: sim.imageUrl || aviao,
+        }))
+      : [];
+
+  const handleCardClick = (simulationId: string) => {
+    // Navegar para os detalhes da simulação
+    console.log("Clicou na simulação:", simulationId);
+    // Exemplo: navigate(`/simulacao/${simulationId}`);
+  };
+
   return (
     <div className="min-h-screen relative flex flex-col items-center justify-center bg-white overflow-hidden">
       {/* logo */}
@@ -25,6 +45,7 @@ const Historico: React.FC = () => {
         alt="IMT AeroDesign Logo"
         className="absolute top-10 left-20 w-30 h-30"
       />
+
       {/* quadrado branco para o filtro */}
       <div className="absolute left-10 top-43 bg-white border-gray-300 rounded-2xl p-6 shadow-2xl w-50 h-75">
         <h1 className="text-2xl text-blue-900 font-bold">Filtros</h1>
@@ -41,52 +62,36 @@ const Historico: React.FC = () => {
           Limpar Filtros
         </h6>
       </div>
-      {/* icones de projetos, feitos com ajuda de IA */}
+
+      {/* Grid de simulações com componente reciclável */}
       <div className="grid grid-cols-3 gap-15 p-6 absolute top-30 left-70">
-        <div className="bg-white rounded-lg shadow p-2">
-          <img src={aviao} className="w-70 h-50 object-cover rounded-md mb-2" />
-          <h3 className="text-sm font-semibold text-gray-800">Simulação I</h3>
-          <p className="text-xs text-gray-500">Em breve</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-2">
-          <div className="h-50 w-70 bg-gray-200 rounded-md mb-2"></div>
-          <h3 className="text-sm font-semibold text-gray-800">Simulação II</h3>
-          <p className="text-xs text-gray-500">Em breve</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-2">
-          <div className="h-50 w-70 bg-gray-200 rounded-md mb-2"></div>
-          <h3 className="text-sm font-semibold text-gray-800">Simulação III</h3>
-          <p className="text-xs text-gray-500">Em breve</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-2">
-          <div className="h-50 w-70 bg-gray-200 rounded-md mb-2"></div>
-          <h3 className="text-sm font-semibold text-gray-800">Simulação VI</h3>
-          <p className="text-xs text-gray-500">Em breve</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-2">
-          <div className="h-50 w-70 bg-gray-200 rounded-md mb-2"></div>
-          <h3 className="text-sm font-semibold text-gray-800">Simulação VI</h3>
-          <p className="text-xs text-gray-500">Em breve</p>
-        </div>
-
-        <div className="bg-white rounded-lg shadow p-2">
-          <div className="h-50 w-70 bg-gray-200 rounded-md mb-2"></div>
-          <h3 className="text-sm font-semibold text-gray-800">Simulação VII</h3>
-          <p className="text-xs text-gray-500">Em breve</p>
-        </div>
+        {displaySimulations.length === 0 ? (
+          <div className="col-span-3 text-center text-gray-500">
+            Nenhuma simulação encontrada.
+          </div>
+        ) : (
+          displaySimulations.map((simulation: any, index: number) => (
+            <SimulationCard
+              key={simulation.id || index}
+              title={simulation.title}
+              description={simulation.description}
+              imageUrl={simulation.imageUrl}
+              date={simulation.date}
+              status={simulation.status}
+              onClick={() => simulation.id && handleCardClick(simulation.id)}
+            />
+          ))
+        )}
       </div>
 
       {/* barra de pesquisa n funcional */}
-      <div className="absolute left-80 top-8 bg-gray-200  rounded-full p-2 w-250 h-10">
+      <div className="absolute left-80 top-8 bg-gray-200 rounded-full p-2 w-250 h-10">
         <div className="font-semibold absolute right-215">Pesquisar...</div>
         <h2>
           <img src={lupa} className="w-10 h-10 absolute top-0" />
         </h2>
       </div>
+
       {/*botão do Home */}
       <Link
         to="/"

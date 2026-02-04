@@ -4,7 +4,7 @@ import type { SimulationParams } from "@/types/simulation";
 export const SimulationService = {
   async getAllSimulations() {
     try {
-      const response = await userMss.post("/get-all-cm-simulation");
+      const response = await userMss.get("/get-all-cm-simulation");
       return response.data;
     } catch (error) {
       console.error("Erro ao buscar todas as simulações:", error);
