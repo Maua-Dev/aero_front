@@ -67,16 +67,17 @@ const Simulacao: React.FC = () => {
   const createSimulation = useCreateSimulation();
   const updateSimulation = useUpdateSimulation();
 
-  const handleCreateSimulation = () => { 
-      const sanitizedParams = sanitizeParams(params);
-      createSimulation.mutate(sanitizedParams);
+  const handleCreateSimulation = () => {
+    const sanitizedParams = sanitizeParams(params);
+    createSimulation.mutate(sanitizedParams);
   };
   const handleUpdateSimulation = () => {
     const sanitizedParams = sanitizeParamsUpdate(params);
-      updateSimulation.mutate({
-        data: { ...sanitizedParams, simulation_id: simulationId },
-      });
-    };
+    if (!simulationId) return;
+    updateSimulation.mutate({
+      data: { ...sanitizedParams, simulation_id: simulationId },
+    });
+  };
   const [params, setparams] = useState<SimulationParams>({
     xcg: 0.0,
     xac_w: 0.0,

@@ -14,7 +14,7 @@ export function AerodinamicaPanel({ params, onChange }: Props) {
         <NumberField
           key={key}
           label={label}
-          value={params[key]}
+          value={params[key] ?? 0}
           unit={unit}
           onChange={(v) => onChange(key, v)}
         />
