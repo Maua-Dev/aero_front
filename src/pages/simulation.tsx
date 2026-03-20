@@ -36,6 +36,7 @@ import { AerodinamicaPanel } from "@/components/ui/aerodynamics";
 import { runSimulation } from "@/utils/calculations";
 import { GraphAdjustmentPanel } from "@/components/ui/graph_adjustment";
 import { FaHome, FaSave } from "react-icons/fa";
+import { MdBrowserUpdated } from "react-icons/md";
 //import { runSimulation } from "src/utils/calculations";
 import {
   useCreateSimulation,
@@ -66,18 +67,16 @@ const Simulacao: React.FC = () => {
   const createSimulation = useCreateSimulation();
   const updateSimulation = useUpdateSimulation();
 
-  const handleCreateSimulation = () => {
-    if (simulationId) {
-      const sanitizedParams = sanitizeParamsUpdate(params);
+  const handleCreateSimulation = () => { 
+      const sanitizedParams = sanitizeParams(params);
+      createSimulation.mutate(sanitizedParams);
+  };
+  const handleUpdateSimulation = () => {
+    const sanitizedParams = sanitizeParamsUpdate(params);
       updateSimulation.mutate({
         data: { ...sanitizedParams, simulation_id: simulationId },
       });
-    } else {
-      const sanitizedParams = sanitizeParams(params);
-      createSimulation.mutate(sanitizedParams);
-    }
-  };
-
+    };
   const [params, setparams] = useState<SimulationParams>({
     xcg: 0.0,
     xac_w: 0.0,
@@ -309,8 +308,17 @@ const Simulacao: React.FC = () => {
             </span>
           </Link>
           <button
-            onClick={handleCreateSimulation}
+            onClick={handleUpdateSimulation}
             className="flex items-center gap-4 px-12 bg-[#223b80] text-white font-semibold cursor-pointer rounded-lg shadow-md"
+          >
+            Atualizar{" "}
+            <span className="text-lg cursor-pointer">
+              <MdBrowserUpdated />
+            </span>
+          </button>
+          <button
+            onClick={handleCreateSimulation}
+            className="flex items-center gap-2 px-12 bg-[#223b80] text-white font-semibold cursor-pointer rounded-lg shadow-md"
           >
             Salvar{" "}
             <span className="text-lg cursor-pointer">
