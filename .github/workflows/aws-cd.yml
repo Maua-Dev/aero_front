@@ -89,6 +89,7 @@ jobs:
           npm run build
         env:
           VITE_STAGE: ${{ env.VITE_STAGE}}
+          VITE_SIMULATION_URL: ${{vars.VITE_SIMULATION_URL}}
 
       - name: Setup envs
         run: |
@@ -99,6 +100,7 @@ jobs:
           echo AWS_BUCKET_ASSETS=${{ vars.AWS_BUCKET_ASSETS }} >> $GITHUB_ENV
           echo VITE_AERO_API=${{ vars.VITE_AERO_API }} >> $GITHUB_ENV
           echo VITE_USER_URL=${{vars.VITE_USER_URL }} >> $GITHUB_ENV
+          echo VITE_SIMULATIO_URL=${{vars.VITE_SIMULATION_URL}} >> $GITHUB_ENV
 
       - name: Deploy with CDK
         env:
