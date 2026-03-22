@@ -13,11 +13,17 @@ import {
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
+  type ChartConfig,
 } from "@/components/ui/chart";
 
+interface SimulationChartDataPoint {
+  month: string;
+  mobile: number;
+}
+
 interface SimulationChartProps {
-  data: any[];
-  config: any;
+  data: SimulationChartDataPoint[];
+  config: ChartConfig;
 }
 
 export function SimulationChart({ data, config }: SimulationChartProps) {
