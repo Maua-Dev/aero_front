@@ -163,7 +163,7 @@ const SimulationCard: React.FC<SimulationCardProps> = ({
           </AreaChart>
         </ChartContainer>
       ) : hasImage ? (
-        <div className="h-50 w-70 bg-gray-200 rounded-md mb-2 flex items-center justify-center">
+        <div className="h-40 w-56 bg-gray-200 rounded-md mb-2 flex items-center justify-center">
           <span className="text-gray-400">Sem imagem</span>
         </div>
       ) : null}

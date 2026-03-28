@@ -76,11 +76,11 @@ const Historico: React.FC = () => {
       <img
         src={logo}
         alt="IMT AeroDesign Logo"
-        className="absolute top-10 left-20 w-30 h-30"
+        className="absolute top-3 left-4 w-35 h-35"
       />
-
+    
       {/* quadrado branco para o filtro */}
-      <div className="absolute left-10 top-43 bg-white border-gray-300 rounded-2xl p-6 shadow-2xl w-50 h-75">
+      {/* <div className="absolute left-10 top-43 bg-white border-gray-300 rounded-2xl p-6 shadow-2xl w-50 h-75">
         <h1 className="text-2xl text-blue-900 font-bold">Filtros</h1>
 
         <h2 className="text-blue-950 text-xl absolute left-7 top-16">Datas</h2>
@@ -94,48 +94,51 @@ const Historico: React.FC = () => {
         <h6 className="cursor-pointer text-lg text-center py-1 hover:bg-blue-900 bg-blue-800 text-white rounded-full h-10 w-40 absolute top-60 left-5 shadow-lg ">
           Limpar Filtros
         </h6>
-      </div>
-
+      </div> */}
+      
       {/* Grid de simulações com componente reciclável */}
-      <div className="grid grid-cols-3 gap-15 p-6 absolute top-30 left-70">
-        {simulations.cm_simulations.length === 0 ? (
-          <div className="col-span-3 text-center text-gray-500">
-            Nenhuma simulação encontrada.
-          </div>
-        ) : (
-          simulations.cm_simulations.map(
-            (simulation: Simulation, index: number) => (
-              <SimulationCard
-                key={simulation.simulation_id || index}
-                title={
-                  simulation.simulation_id
-                    ? `Simulação ${simulation.simulation_id}`
-                    : `Simulação ${index + 1}`
-                }
-                simulation={simulation}
-                onClick={() =>
-                  simulation.simulation_id &&
-                  handleCardClick(simulation.simulation_id)
-                }
-                onDelete={(id: string) => setSelectedDelete(id)}
-              />
-            ),
-          )
-        )}
+      <div className="min-h-screen pl-40 pr-5">
+       <div className="mt-2 w-full max-w-6xl h-[100vh] overflow-y-auto mx-auto">
+        <div className="grid grid-cols-3 gap-15 p-6">
+          {simulations.cm_simulations.length === 0 ? (
+            <div className="col-span-3 text-center text-gray-500">
+              Nenhuma simulação encontrada.
+            </div>
+          ) : (
+            simulations.cm_simulations.map(
+              (simulation: Simulation, index: number) => (
+                <SimulationCard
+                  key={simulation.simulation_id || index}
+                  title={
+                    simulation.simulation_id
+                      ? `Simulação ${simulation.simulation_id}`
+                      : `Simulação ${index + 1}`
+                  }
+                  simulation={simulation}
+                  onClick={() =>
+                    simulation.simulation_id &&
+                    handleCardClick(simulation.simulation_id)
+                  }
+                  onDelete={(id: string) => setSelectedDelete(id)}
+                />
+              ),
+            )
+          )}
+        </div>
+       </div>
       </div>
-
       {/* barra de pesquisa n funcional */}
-      <div className="absolute left-80 top-8 bg-gray-200 rounded-full p-2 w-250 h-10">
+      {/* <div className="absolute left-80 top-8 bg-gray-200 rounded-full p-2 w-250 h-10">
         <div className="font-semibold absolute right-215">Pesquisar...</div>
         <h2>
           <img src={lupa} className="w-10 h-10 absolute top-0" />
         </h2>
-      </div>
+      </div> */}
 
       {/*botão do Home */}
       <Link
         to="/"
-        className="cursor-pointer hover:bg-blue-900 bg-blue-800 text-white rounded-full h-15 w-40 absolute top-165 left-10 "
+        className="cursor-pointer hover:bg-blue-900 bg-blue-800 text-white rounded-full h-15 w-40 absolute top-45 left-3"
       >
         {" "}
         <h1 className="text-2xl font-bold absolute left-5 top-3">Home</h1>
