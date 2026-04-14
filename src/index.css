@@ -1,0 +1,14 @@
+@import "tailwindcss";
+.scroll-invisible {
+  scrollbar-width: none; /* Firefox */
+}
+
+.scroll-invisible::-webkit-scrollbar {
+  display: none; /* Chrome, Safari */
+}
+.scroll-thin {
+  scrollbar-width: thin; /* Firefox */
+}
+.scroll-thin::-webkit-scrollbar {
+  width: 6px; /* Chrome, Safari */
+}
