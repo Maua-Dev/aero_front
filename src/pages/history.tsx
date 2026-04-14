@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import logo from "../assets/logo.png";
-import lupa from "../assets/lupa.png";
 import casa from "../assets/casa.png";
 import { Link, useNavigate } from "react-router-dom";
 import { useAllSimulation, useDeleteSimulation } from "@/hooks/use_simulation";
@@ -78,7 +77,7 @@ const Historico: React.FC = () => {
         alt="IMT AeroDesign Logo"
         className="absolute top-3 left-4 w-35 h-35"
       />
-    
+
       {/* quadrado branco para o filtro */}
       {/* <div className="absolute left-10 top-43 bg-white border-gray-300 rounded-2xl p-6 shadow-2xl w-50 h-75">
         <h1 className="text-2xl text-blue-900 font-bold">Filtros</h1>
@@ -95,37 +94,37 @@ const Historico: React.FC = () => {
           Limpar Filtros
         </h6>
       </div> */}
-      
+
       {/* Grid de simulações com componente reciclável */}
       <div className="min-h-screen pl-40 pr-5">
-       <div className="mt-2 w-full max-w-6xl h-[100vh] overflow-y-auto mx-auto">
-        <div className="grid grid-cols-3 gap-15 p-6">
-          {simulations.cm_simulations.length === 0 ? (
-            <div className="col-span-3 text-center text-gray-500">
-              Nenhuma simulação encontrada.
-            </div>
-          ) : (
-            simulations.cm_simulations.map(
-              (simulation: Simulation, index: number) => (
-                <SimulationCard
-                  key={simulation.simulation_id || index}
-                  title={
-                    simulation.simulation_id
-                      ? `Simulação ${simulation.simulation_id}`
-                      : `Simulação ${index + 1}`
-                  }
-                  simulation={simulation}
-                  onClick={() =>
-                    simulation.simulation_id &&
-                    handleCardClick(simulation.simulation_id)
-                  }
-                  onDelete={(id: string) => setSelectedDelete(id)}
-                />
-              ),
-            )
-          )}
+        <div className="mt-2 w-full max-w-6xl h-[100vh] overflow-y-auto mx-auto">
+          <div className="grid grid-cols-3 gap-15 p-6">
+            {simulations.cm_simulations.length === 0 ? (
+              <div className="col-span-3 text-center text-gray-500">
+                Nenhuma simulação encontrada.
+              </div>
+            ) : (
+              simulations.cm_simulations.map(
+                (simulation: Simulation, index: number) => (
+                  <SimulationCard
+                    key={simulation.simulation_id || index}
+                    title={
+                      simulation.simulation_id
+                        ? `Simulação ${simulation.simulation_id}`
+                        : `Simulação ${index + 1}`
+                    }
+                    simulation={simulation}
+                    onClick={() =>
+                      simulation.simulation_id &&
+                      handleCardClick(simulation.simulation_id)
+                    }
+                    onDelete={(id: string) => setSelectedDelete(id)}
+                  />
+                ),
+              )
+            )}
+          </div>
         </div>
-       </div>
       </div>
       {/* barra de pesquisa n funcional */}
       {/* <div className="absolute left-80 top-8 bg-gray-200 rounded-full p-2 w-250 h-10">

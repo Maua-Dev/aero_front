@@ -14,13 +14,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 
-import {
-  Card,
-  CardContent,
-  //CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import {
   ChartContainer,
   ChartTooltip,
@@ -177,8 +171,8 @@ const Simulacao: React.FC = () => {
     (p, i) => i > 0 && p.cm_total * chartData[i - 1].cm_total <= 0,
   );
 
-  return (<div className="min-h-screen p-2 flex gap-1 flex-row bg-gray-100">
-    
+  return (
+    <div className="min-h-screen p-2 flex gap-1 flex-row bg-gray-100">
       {isLoading && (
         <div className="absolute inset-0 bg-black bg-opacity-90 h-screen w-screen flex items-center justify-center z-50">
           <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
@@ -197,18 +191,22 @@ const Simulacao: React.FC = () => {
       <div className="flex flex-col flex-1 overflow-hidden">
         {/* Área do gráfico */}
         <Card className="flex-1 overflow-hidden">
-            <ChartContainer className="h-full"
-              config={{
-                cm: {
-                  label: "cm",
-                  color: "var(--chart-1)",
-                },
-              }}
-            >
-             <ResponsiveContainer width="100%" height="100%">
+          <div className="px-6">
+            <h2 className="leading-none font-semibold">Simulação</h2>
+          </div>
+          <ChartContainer
+            className="h-[calc(100%-56px)]"
+            config={{
+              cm: {
+                label: "cm",
+                color: "var(--chart-1)",
+              },
+            }}
+          >
+            <ResponsiveContainer width="100%" height="100%">
               <AreaChart
                 data={chartData}
-                margin={{right:70, top: 16, bottom: 32 }}
+                margin={{ right: 70, top: 16, bottom: 32 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
 
@@ -241,7 +239,6 @@ const Simulacao: React.FC = () => {
                     y={equilibrio.cm_total}
                     r={6}
                     fill="red"
-                    w-
                     stroke="white"
                     label={{
                       value: `α = ${equilibrio.alpha}°`,
@@ -286,8 +283,8 @@ const Simulacao: React.FC = () => {
                   content={<ChartTooltipContent indicator="line" />}
                 />
               </AreaChart>
-             </ResponsiveContainer>
-            </ChartContainer>
+            </ResponsiveContainer>
+          </ChartContainer>
         </Card>
 
         {/* Botões inferiores */}
