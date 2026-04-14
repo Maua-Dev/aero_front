@@ -11,6 +11,7 @@ import {
   YAxis,
   ReferenceLine,
   ReferenceDot,
+  ResponsiveContainer,
 } from "recharts";
 
 import {
@@ -176,8 +177,8 @@ const Simulacao: React.FC = () => {
     (p, i) => i > 0 && p.cm_total * chartData[i - 1].cm_total <= 0,
   );
 
-  return (
-    <div className="min-h-screen p-2 flex flex-row bg-gray-100">
+  return (<div className="min-h-screen p-2 flex gap-1 flex-row bg-gray-100">
+    
       {isLoading && (
         <div className="absolute inset-0 bg-black bg-opacity-90 h-screen w-screen flex items-center justify-center z-50">
           <div className="loader ease-linear rounded-full border-8 border-t-8 border-gray-200 h-16 w-16"></div>
@@ -193,17 +194,10 @@ const Simulacao: React.FC = () => {
       */}
 
       {/* Conteúdo principal */}
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 overflow-hidden">
         {/* Área do gráfico */}
-        <Card className="max-w-[1020px] h-[625px]">
-          <CardHeader>
-            <CardTitle>Simulação</CardTitle>
-            {/* <CardDescription>
-              Showing total visitors for the last 6 months
-            </CardDescription> */}
-          </CardHeader>
-          <CardContent>
-            <ChartContainer
+        <Card className="flex-1 overflow-hidden">
+            <ChartContainer className="h-full"
               config={{
                 cm: {
                   label: "cm",
@@ -211,11 +205,10 @@ const Simulacao: React.FC = () => {
                 },
               }}
             >
+             <ResponsiveContainer width="100%" height="100%">
               <AreaChart
-                width={600}
-                height={300}
                 data={chartData}
-                margin={{ left: 16, right: 24, top: 16, bottom: 32 }}
+                margin={{right:70, top: 16, bottom: 32 }}
               >
                 <CartesianGrid strokeDasharray="3 3" />
 
@@ -293,8 +286,8 @@ const Simulacao: React.FC = () => {
                   content={<ChartTooltipContent indicator="line" />}
                 />
               </AreaChart>
+             </ResponsiveContainer>
             </ChartContainer>
-          </CardContent>
         </Card>
 
         {/* Botões inferiores */}
@@ -329,7 +322,7 @@ const Simulacao: React.FC = () => {
         </div>
       </div>
       {/* Painel lateral */}
-      <div className="w-[300px] h-[625px] bg-white shadow-xl p-3 border border-orange-300 rounded-lg flex flex-col">
+      <div className="w-[400px] h-full max-h-[90vh] bg-white shadow-xl p-3 border border-orange-300 rounded-lg flex flex-col">
         <div className="flex-1 overflow-y-auto pr-2 scroll-invisible">
           <div
             className="flex justify-between items-center cursor-pointer border-b border-orange-300 mb-4 flex-shrink-0"
