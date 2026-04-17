@@ -97,8 +97,8 @@ const Historico: React.FC = () => {
       </div> */}
       
       {/* Grid de simulações com componente reciclável */}
-      <div className="min-h-screen pl-40 pr-5">
-       <div className="mt-2 w-full max-w-6xl h-[100vh] overflow-y-auto mx-auto">
+      <div className="min-h-screen pl-40">
+       <div className="mt-2 w-full max-w-6xl h-[90vh] overflow-y-auto mx-auto">
         <div className="grid grid-cols-3 gap-15 p-6">
           {simulations.cm_simulations.length === 0 ? (
             <div className="col-span-3 text-center text-gray-500">
@@ -111,7 +111,7 @@ const Historico: React.FC = () => {
                   key={simulation.simulation_id || index}
                   title={
                     simulation.simulation_id
-                      ? `Simulação ${simulation.simulation_id}`
+                      ? `Simulação ${index + 1}`
                       : `Simulação ${index + 1}`
                   }
                   simulation={simulation}
