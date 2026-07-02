@@ -27,7 +27,7 @@ export function useCreateSimulation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["allSimulations"] });
-      toast.success("Simulação salva com sucesso!");
+      toast.success("Simulação criada com sucesso!");
     },
     onError: (error) => {
       console.error(error);
