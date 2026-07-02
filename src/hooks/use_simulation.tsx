@@ -27,6 +27,11 @@ export function useCreateSimulation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["allSimulations"] });
+      toast.success("Simulação criada com sucesso!");
+    },
+    onError: (error) => {
+      console.error(error);
+      toast.error("Erro ao salvar simulação.");
     },
   });
 }
@@ -60,7 +65,7 @@ export function useUpdateSimulation() {
     },
     onError: (error) => {
       console.error(error);
-      alert("Erro ao atualizar simulação.");
+      toast.error("Erro ao atualizar simulação.");
     },
   });
 }
